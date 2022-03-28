@@ -12,10 +12,16 @@ points = np.array([])
 
 # topic /xyz_cropped_ball
 def point_callback(array):
+	# Allow reassignment of global variables
 	global points_received
 	global points
+	# Save the given data
 	points = array
 	points_received = True
+
+
+def get_sphere_params(data):
+	pass
 	
 
 if __name__ == "__main__":
@@ -32,6 +38,8 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# make sure we've received data to work on
 		if points_received:
-			raise NotImplementedError()
+			# Get sphere params from data then publish them
+			point_pub.publish(get_sphere_params(points))
+		rate.sleep()
 
 
