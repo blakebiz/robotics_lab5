@@ -4,11 +4,12 @@ import rospy
 import numpy as np
 import cv2
 
-from robot_visiualization_lectures.msg import XYZarray, SphereParams
+from robot_vision_lectures.msg import XYZarray, SphereParams
 from cv_bridge import CvBridge
 
 points_received = False
 points = np.array([])
+sphere_params = SphereParams()
 
 # topic /xyz_cropped_ball
 def point_callback(array):
@@ -20,9 +21,20 @@ def point_callback(array):
 	points_received = True
 
 
-def get_sphere_params(data):
-	pass
-	
+def set_sphere_params(data):
+	global sphere_params
+	# Get A and B arrays
+	A, B = [], []
+	for point in data.points:
+		A.append([point.x*2, point.y*2, point.z*2, 1])
+		B.append(point.x**2 + point.y**2 + point.z**2)
+	# Calculate P
+	P = np.linalg.lstsq(A, B, rcond=None)[0]
+	# Use P to set the attributes of the sphere_params
+	sphere_params.xc = P[0]
+	sphere_params.yc = P[1]
+	sphere_params.zc = P[2]
+	sphere_params.radius = P[0]**2 + P[1]**2 + P[2]**2 + P[3]
 
 if __name__ == "__main__":
 	# initialize ros node
@@ -38,8 +50,10 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# make sure we've received data to work on
 		if points_received:
-			# Get sphere params from data then publish them
-			point_pub.publish(get_sphere_params(points))
+			# Calculate params needed
+			set_sphere_params(points)
+			# Publish the results
+			point_pub.publish(sphere_params)
 		rate.sleep()
 
 
