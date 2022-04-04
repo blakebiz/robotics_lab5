@@ -3,9 +3,11 @@
 import rospy
 import numpy as np
 import cv2
+import math
 
 from robot_vision_lectures.msg import XYZarray, SphereParams
 from cv_bridge import CvBridge
+
 
 points_received = False
 points = np.array([])
@@ -34,7 +36,7 @@ def set_sphere_params(data):
 	sphere_params.xc = P[0]
 	sphere_params.yc = P[1]
 	sphere_params.zc = P[2]
-	sphere_params.radius = P[0]**2 + P[1]**2 + P[2]**2 + P[3]
+	sphere_params.radius = math.sqrt(P[0]**2 + P[1]**2 + P[2]**2 + P[3])
 
 if __name__ == "__main__":
 	# initialize ros node
